@@ -1,0 +1,100 @@
+<!DOCTYPE html><html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>प्रखर जनवाणी</title>
+  <style>
+    body {font-family: Arial; margin:0; background:#f4f4f4}
+    header {background:#b30000; color:white; padding:15px; text-align:center}
+    nav {background:#333; padding:10px; text-align:center}
+    nav a {color:white; margin:10px; text-decoration:none}
+    .container {padding:20px; max-width:900px; margin:auto}
+    .news {background:white; padding:15px; margin-bottom:20px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1)}
+    .news img {width:100%; border-radius:5px; margin:10px 0}
+    .news h2 {color:#b30000}
+    .admin {background:#fff; padding:15px; margin-top:20px; border-radius:8px}
+    input, textarea, select {width:100%; margin:5px 0; padding:10px}
+    button {background:#b30000; color:white; padding:10px; border:none; cursor:pointer}
+  </style>
+</head>
+<body><header>
+  <p style="margin:0; font-size:14px;">साप्ताहिक</p>
+  <h1>प्रखर जनवाणी</h1>
+  <p style="margin:0; font-size:14px;">हर ख़बर पर सच की नज़र</p>
+</header><nav>
+  <a href="#">होम</a>
+  <a href="#">राष्ट्रीय</a>
+  <a href="#">शिक्षा</a>
+  <a href="#">राजनीति</a>
+</nav><div class="container">
+  <div id="newsContainer"></div> <div class="admin">
+    <h3>Admin Login</h3>
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Login</button><div id="adminPanel" style="display:none;">
+  <h3>समाचार जोड़ें</h3>
+  <input type="text" id="title" placeholder="शीर्षक">
+  <textarea id="content" placeholder="समाचार लिखें"></textarea>
+  <input type="text" id="image" placeholder="Image URL paste करें">
+  <select id="category">
+    <option>मेरा प्रदेश</option>
+    <option>संपादकीय / विचार मंथन</option>
+    <option>अन्य प्रदेश साप्ताहिकी</option>
+    <option>राष्ट्रीय / अंतराष्ट्रीय</option>
+    <option>शिक्षा / विज्ञान</option>
+    <option>मनोरंजन / कला</option>
+  </select>
+  <button onclick="addNews()">Publish</button>
+</div>
+
+  </div>
+</div><script>
+  let newsData = JSON.parse(localStorage.getItem('news')) || [];
+
+  function displayNews() {
+    let container = document.getElementById('newsContainer');
+    container.innerHTML = '';
+
+    newsData.slice().reverse().forEach(n => {
+      container.innerHTML += `
+        <div class="news">
+          <h2>${n.title}</h2>
+          <small>${n.category}</small>
+          ${n.image ? `<img src="${n.image}">` : ''}
+          <p>${n.content}</p>
+        </div>`;
+    });
+  }
+
+  function login() {
+    let email = document.getElementById('email').value;
+    let password = document.getElementById('password').value;
+
+    if(email === "admin@gmail.com" && password === "1234") {
+      document.getElementById('adminPanel').style.display = 'block';
+      alert('Login successful');
+    } else {
+      alert('Wrong credentials');
+    }
+  }
+
+  function addNews() {
+    let title = document.getElementById('title').value;
+    let content = document.getElementById('content').value;
+    let image = document.getElementById('image').value;
+    let category = document.getElementById('category').value;
+
+    if(title && content) {
+      newsData.push({title, content, image, category});
+      localStorage.setItem('news', JSON.stringify(newsData));
+      displayNews();
+
+      document.getElementById('title').value='';
+      document.getElementById('content').value='';
+      document.getElementById('image').value='';
+    }
+  }
+
+  displayNews();
+</script></body>
+</html>
