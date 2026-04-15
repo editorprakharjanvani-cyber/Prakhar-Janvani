@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>प्रखर जनवाणी</title>
+
+<style>
+body {font-family: Arial; margin:0; background:#f4f4f4}
+header {background:#b30000; color:white; padding:10px; text-align:center}
+
+nav {background:#222; padding:10px; text-align:center}
+nav a {color:white; margin:10px; cursor:pointer}
+
+.breaking {background:black; color:white; padding:8px; overflow:hidden}
+.breaking span {animation:scroll 15s linear infinite; display:inline-block}
+@keyframes scroll {from{transform:translateX(100%)} to{transform:translateX(-100%)}}
+
+.container {padding:10px}
+
+.news {
+background:white;
+margin:10px;
+border-radius:10px;
+overflow:hidden;
+box-shadow:0 2px 6px rgba(0,0,0,0.2);
+cursor:pointer;
+}
+
+.news img {width:100%}
+.news h3 {padding:10px}
+.news p {padding:0 10px 10px}
+
+.article {
+background:white;
+padding:15px;
+margin:10px;
+border-radius:10px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h2>प्रखर जनवाणी</h2>
+<p>हर ख़बर पर सच की नज़र</p>
+</header>
+
+<div class="breaking">
+<span id="breaking"></span>
+</div>
+
+<nav>
+<a onclick="loadIndia()">भारत</a>
+<a onclick="loadWorld()">विश्व</a>
+</nav>
+
+<div class="container" id="content"></div>
+
+<script>
+
+let currentNews = [];
+
+function setBreaking(list){
+document.getElementById("breaking").innerText = list.join(" | ");
+}
+
+// 🇮🇳 INDIA
+function loadIndia(){
+fetch("https://api.allorigins.win/get?url=" + encodeURIComponent("https://feeds.feedburner.com/ndtvkhabar"))
+.then(res=>res.json())
+.then(data=>parseRSS(data.contents));
+}
+
+// 🌍 WORLD
+function loadWorld(){
+fetch("https://api.allorigins.win/get?url=" + encodeURIComponent("https://feeds.bbci.co.uk/news/world/rss.xml"))
+.then(res=>res.json())
+.then(data=>parseRSS(data.contents));
+}
+
+function parseRSS(xmlText){
+let parser = new DOMParser();
+let xml = parser.parseFromString(xmlText, "text/xml");
+let items = xml.querySelectorAll("item");
+
+let html = "";
+let breaking = [];
+currentNews = [];
+
+items.forEach((el,i)=>{
+if(i<8){
+
+let t = el.querySelector("title").textContent;
+let d = el.querySelector("description").textContent;
+let link = el.querySelector("link").textContent;
+
+// 🖼 image extract
+let img = "";
+let media = el.getElementsByTagName("media:content")[0];
+if(media) img = media.getAttribute("url");
+
+if(!img){
+let temp = document.createElement("div");
+temp.innerHTML = d;
+let imgtag = temp.querySelector("img");
+if(imgtag) img = imgtag.src;
+}
+
+if(!img){
+img = "https://via.placeholder.com/600x300?text=News";
+}
+
+breaking.push(t);
+
+currentNews.push({title:t, content:d, image:img, link:link});
+
+html += `
+<div class="news" onclick="openArticle(${i})">
+<img src="${img}">
+<h3>${t}</h3>
+<p>${d.substring(0,100)}...</p>
+</div>`;
+}
+});
+
+document.getElementById("content").innerHTML = html;
+setBreaking(breaking);
+}
+
+// 📰 FULL ARTICLE VIEW
+function openArticle(index){
+let n = currentNews[index];
+
+document.getElementById("content").innerHTML = `
+<div class="article">
+<h2>${n.title}</h2>
+<img src="${n.image}">
+<p>${n.content}</p>
+<br>
+<a href="${n.link}" target="_blank">पूरा समाचार पढ़ें</a>
+<br><br>
+<button onclick="loadIndia()">⬅ वापस जाएं</button>
+</div>`;
+}
+
+// default
+loadIndia();
+
+</script>
+
+</body>
+</html>
